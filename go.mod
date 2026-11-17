@@ -1,3 +1,3 @@
-module chess-analyser
+module github.com/booth-w/chess-analyser
 
 go 1.27.1

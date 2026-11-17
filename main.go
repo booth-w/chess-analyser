@@ -2,13 +2,26 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
+	"runtime/pprof"
 
-	"github.com/booth-w/chess-analysis/pkg/parser"
+	"github.com/booth-w/chess-analyser/pkg/parser"
 )
 
 func main() {
+	flagProfile := flag.Bool("profile", false, "Enable CPU profiling (creates cpu.prof)")
+	flag.Parse()
+
+	fmt.Println(*flagProfile)
+
+	if *flagProfile {
+		profFile, _ := os.Create("cpu.prof")
+		pprof.StartCPUProfile(profFile)
+		defer pprof.StopCPUProfile()
+	}
+
 	s := bufio.NewScanner(os.Stdin)
 
 	total := 0
@@ -17,7 +30,7 @@ func main() {
 		line := s.Text()
 
 		winner := parser.GetWinner(line)
-		if (winner != -1) {
+		if winner != -1 {
 			total++
 			wins[winner]++
 		}

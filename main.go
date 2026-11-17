@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
 	"runtime/pprof"
 
@@ -14,26 +14,27 @@ func main() {
 	flagProfile := flag.Bool("profile", false, "Enable CPU profiling (creates cpu.prof)")
 	flag.Parse()
 
-	fmt.Println(*flagProfile)
-
 	if *flagProfile {
 		profFile, _ := os.Create("cpu.prof")
 		pprof.StartCPUProfile(profFile)
 		defer pprof.StopCPUProfile()
 	}
 
-	s := bufio.NewScanner(os.Stdin)
+	games := parser.ParseStdin()
 
-	total := 0
-	wins := [3]int{}
-	for s.Scan() {
-		line := s.Text()
+	slog.Info("Getting total wins per colour")
 
-		winner := parser.GetWinner(line)
-		if winner != -1 {
-			total++
-			wins[winner]++
-		}
-	}
-	fmt.Printf("White: %d\nBlack: %d\nDraw:  %d\nTotal: %d\n", wins[0], wins[1], wins[2], total)
+	whitePercent := float64(games.Wins[0]) / float64(games.TotalGames) * 100
+	blackPercent := float64(games.Wins[1]) / float64(games.TotalGames) * 100
+	drawPercent := float64(games.Wins[2]) / float64(games.TotalGames) * 100
+
+	fmt.Printf(
+		"White: %d (%.2f%%)\nBlack: %d (%.2f%%)\nDraw:  %d (%.2f%%)\nTotal: %d\n",
+		games.Wins[0], whitePercent,
+		games.Wins[1], blackPercent,
+		games.Wins[2], drawPercent,
+		games.TotalGames,
+	)
+
+	slog.Info("Done")
 }
